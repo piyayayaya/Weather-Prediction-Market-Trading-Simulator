@@ -1,230 +1,48 @@
-# Weather Prediction Market Trading Simulator
+# Weather Prediction-Market Trading Simulator
 
-## Overview
+This project is a Python simulator for trading binary weather prediction markets.
 
-This project is a Python-based prediction market trading framework focused on weather events. The system converts weather forecasts into probabilistic estimates, transforms those probabilities into prediction-market fair values, identifies market mispricings, generates trading signals, manages inventory and risk, and evaluates performance through Monte Carlo simulation.
+The main contract I use is:
 
-The primary contract studied throughout development was:
+> Will Philadelphia receive at least 0.50 inches of rain tomorrow?
 
-> Will Philadelphia receive more than 0.50 inches of rain tomorrow?
+A YES contract pays $1 if the event happens and $0 otherwise.  
+A NO contract pays the opposite.
 
-Although the project began with a single contract, it was later extended to support multiple cities and live weather forecast data.
-
----
-
-## Motivation
-
-Prediction markets can be viewed as probability markets where contract prices represent beliefs about future events.
-
-For a binary YES contract:
-
-* YES pays $1 if the event occurs
-* YES pays $0 otherwise
-
-If an event has a 70% probability of occurring, the fair value of a YES contract is approximately:
-
-Fair Value = 0.70
-
-The central goal of the project is to identify situations where market prices differ from forecast-implied fair values and trade accordingly.
+The goal of the project is to take weather forecast data, convert it into event probabilities, use those probabilities as fair values for YES/NO contracts, and then simulate trading around differences between model value and market price.
 
 ---
 
-## Core Features
+## Project Overview
 
-### Contract Modeling
+The project has a few main parts:
 
-* Binary YES/NO weather contracts
-* Event resolution logic
-* Contract settlement and payout calculations
-
-### Forecast Modeling
-
-* Forecast-implied probability estimation
-* Fair value calculation
-* Edge calculation versus market prices
-
-### Trading Engine
-
-* BUY YES signals
-* SELL YES signals
-* NO TRADE decisions
-* Dynamic position sizing
-
-### Portfolio Management
-
-* Cash tracking
-* Inventory tracking
-* Portfolio valuation
-* Realized and unrealized PnL
-
-### Risk Management
-
-* Inventory limits
-* Conservative trading mode
-* Aggressive trading mode
-* Trade blocking when limits are exceeded
-
-### Bayesian Updating
-
-* Sequential probability updates
-* Bullish weather signals
-* Bearish weather signals
-* Neutral weather signals
-
-### Backtesting
-
-* Monte Carlo simulation framework
-* Performance evaluation across many market paths
-* Win-rate analysis
-* Risk-adjusted performance metrics
-
-### Visualization
-
-* Market price evolution
-* Model probability evolution
-* Inventory history
-* Portfolio value history
-* PnL history
-* Monte Carlo PnL distributions
-
-### Live Data Integration
-
-* Open-Meteo API integration
-* Live precipitation forecasts
-* Real-time probability estimation
-* Multi-city forecast analysis
+- pulls historical and live weather data from Open-Meteo
+- measures historical forecast errors
+- converts forecasts into event probabilities
+- calibrates those probabilities using walk-forward validation
+- updates probabilities as forecasts change during the day
+- compares model fair value to market bid/ask prices
+- sizes trades using fractional Kelly sizing
+- tracks positions, cash, and P&L
+- settles contracts at $0 or $1
+- runs Monte Carlo simulations
+- runs control tests and sensitivity analysis
 
 ---
 
-## Project Architecture
+## Data
 
-```text
-Weather Forecast
-        ↓
-Probability Estimate
-        ↓
-Fair Value Calculation
-        ↓
-Market Price Comparison
-        ↓
-Edge Detection
-        ↓
-Trading Signal
-        ↓
-Position Sizing
-        ↓
-Risk Checks
-        ↓
-Trade Recommendation
-        ↓
-PnL Tracking
-```
+The project uses Open-Meteo data for Philadelphia.
 
----
+I use:
 
-## Bayesian Forecast Updating
+- historical precipitation forecasts
+- historical realized precipitation
+- live precipitation forecasts
 
-The project incorporates Bayesian inference to update event probabilities as new weather information arrives.
+The historical sample currently contains 90 aligned forecast/actual observations.
 
-Rather than manually adjusting probabilities, the model updates beliefs using conditional probabilities associated with different weather signals.
+The event threshold is:
 
-This allows forecast probabilities to evolve in a statistically consistent manner as new information becomes available.
-
----
-
-## Monte Carlo Backtesting
-
-To evaluate robustness, the strategy is tested across many simulated market and weather-information paths.
-
-Performance metrics include:
-
-* Average Final PnL
-* Win Rate
-* PnL Standard Deviation
-* Sharpe-Like Ratio
-* Best Simulation Outcome
-* Worst Simulation Outcome
-
-Example Results:
-
-* Average Final PnL ≈ 0.96
-* Win Rate ≈ 84%
-* Sharpe-Like Ratio ≈ 0.79
-
----
-
-## Live Weather Forecast Integration
-
-The simulator integrates live weather forecasts through the Open-Meteo API.
-
-For each city, the framework retrieves:
-
-* Hourly precipitation probabilities
-* Maximum precipitation probability
-* Average precipitation probability
-* Time of highest precipitation risk
-
-These forecasts are converted into prediction-market fair values and used to generate live trading recommendations.
-
----
-
-## Multi-City Analysis
-
-Supported cities:
-
-* Philadelphia
-* New York
-* Chicago
-* Miami
-
-Example output:
-
-| City         | Forecast Probability | Market Price | Signal   |
-| ------------ | -------------------- | ------------ | -------- |
-| Philadelphia | 3%                   | 10%          | SELL YES |
-| New York     | 11%                  | 12%          | NO TRADE |
-| Chicago      | 87%                  | 15%          | BUY YES  |
-| Miami        | 32%                  | 20%          | BUY YES  |
-
-This extension transforms the project from a single-contract simulator into a portfolio-style prediction market scanner.
-
----
-
-## Technologies Used
-
-* Python
-* NumPy
-* Matplotlib
-* Requests
-* Open-Meteo API
-
----
-
-## Key Concepts Demonstrated
-
-* Prediction Markets
-* Probabilistic Forecasting
-* Bayesian Updating
-* Fair Value Estimation
-* Trading Signal Generation
-* Position Sizing
-* Inventory Management
-* Risk Controls
-* Monte Carlo Simulation
-* Performance Analytics
-* Live Data Integration
-
----
-
-## Future Improvements
-
-Potential extensions include:
-
-* Historical weather backtesting
-* Real prediction-market data from Kalshi
-* Real prediction-market data from Polymarket
-* Multi-city portfolio optimization
-* Weather market making strategies
-* Forecast calibration analysis
-* Additional weather contracts (snowfall, temperature, wind, hurricanes)
-* Machine learning forecast models
+0.50 inches of rain
